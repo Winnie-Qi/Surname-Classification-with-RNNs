@@ -790,3 +790,18 @@ for batch_index, batch_dict in enumerate(batch_generator):
 
 train_state['test_loss'] = running_loss
 train_state['test_acc'] = running_acc
+
+def predict_nationality(surname, classifier, vectorizer):
+    vectorized_surname, vec_length = vectorizer.vectorize(surname)
+    vectorized_surname = torch.tensor(vectorized_surname).unsqueeze(dim=0)
+    vec_length = torch.tensor([vec_length], dtype=torch.int64)
+
+    result = classifier(vectorized_surname, vec_length, apply_softmax=True)
+    probability_values, indices = result.max(dim=1)
+
+    index = indices.item()
+    prob_value = probability_values.item()
+
+    predicted_nationality = vectorizer.nationality_vocab.lookup_index(index)
+
+    return {'nationality': predicted_nationality, 'probability': prob_value, 'surname': surname}
